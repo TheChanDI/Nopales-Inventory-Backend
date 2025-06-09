@@ -1,10 +1,15 @@
 "use client";
 import { useState } from "react";
 
+interface WineProps {
+  label: string;
+  perBox: number;
+}
+
 export default function Home() {
   const [wineName, setWineName] = useState("");
   const [perBox, setPerBox] = useState("");
-  const [wineList, setWineList] = useState([]);
+  const [wineList, setWineList] = useState<Array<WineProps>>([]);
 
   const handleAddWine = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +27,9 @@ export default function Home() {
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Wine Inventory</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+        Sparkling Wine Inventory
+      </h2>
       <form onSubmit={handleAddWine} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
