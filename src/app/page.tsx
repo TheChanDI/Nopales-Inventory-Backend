@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface WineProps {
   label: string;
@@ -11,6 +11,23 @@ export default function Home() {
   const [perBox, setPerBox] = useState("");
   const [wineList, setWineList] = useState<Array<WineProps>>([]);
 
+  useEffect(() => {
+    getInventoryList();
+  }, []);
+
+  const getInventoryList = async () => {
+    try {
+      const response = await fetch("/api", {
+        method: "GET",
+      });
+      const data = await response.json();
+      console.log(data, "data -->");
+      setWineList(data);
+    } catch (error) {
+      console.error("Error fetching list:", error);
+    }
+  };
+
   const handleAddWine = (e: React.FormEvent) => {
     e.preventDefault();
     if (!wineName.trim() || !perBox.trim()) return;
@@ -20,9 +37,28 @@ export default function Home() {
       perBox: parseInt(perBox, 10),
     };
 
-    setWineList([...wineList, newEntry]);
+    addToList();
     setWineName("");
     setPerBox("");
+  };
+
+  const addToList = async () => {
+    try {
+      const response = await fetch("/api", {
+        method: "POST",
+        body: JSON.stringify({
+          category: "Sparkling Wine",
+          label: wineName.trim(),
+          perBox: parseInt(perBox, 10),
+        }),
+      });
+
+      const data = await response.json();
+      setWineList([...wineList, data]);
+      console.log(data, "added data -->");
+    } catch (error) {
+      console.error("Error adding to list:", error);
+    }
   };
 
   return (
