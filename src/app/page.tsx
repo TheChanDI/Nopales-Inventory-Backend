@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import InventoryItem from "./components/InventoryItem";
+import toast from "react-hot-toast";
 
 export interface InventoryListProps {
   id: number;
@@ -25,9 +26,11 @@ export default function Home() {
         method: "GET",
       });
       const data = await response.json();
+      toast.success("Inventory List Fetched Successfully");
       console.log(data, "data -->");
       setInventoryList(data);
     } catch (error) {
+      toast.error("Error Fetching Inventory List");
       console.error("Error fetching list:", error);
     } finally {
       setLoading(false);
@@ -62,8 +65,10 @@ export default function Home() {
         list: [...updatedList[index].list, data],
       };
       setInventoryList(updatedList);
+      toast.success("Item Added Successfully");
     } catch (error) {
       console.error("Error adding to list:", error);
+      toast.error("Error Adding Item");
     } finally {
       setLoading(false);
     }
@@ -85,8 +90,10 @@ export default function Home() {
         list: item.list.filter((wine) => wine.id !== data.id),
       }));
       setInventoryList(updatedList);
+      toast.success("Item Deleted Successfully");
     } catch (error) {
       console.error("Error deleting an item:", error);
+      toast.error("Error Deleting Item");
     } finally {
       setLoading(false);
     }
@@ -121,8 +128,10 @@ export default function Home() {
       updatedList[index] = updatedCategory;
 
       setInventoryList(updatedList);
+      toast.success("Item Updated Successfully");
     } catch (error) {
       console.error("Error updating an item:", error);
+      toast.error("Error Updating Item");
     } finally {
       setLoading(false);
     }
