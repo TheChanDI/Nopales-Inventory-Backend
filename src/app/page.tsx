@@ -10,7 +10,7 @@ export interface InventoryListProps {
 
 export default function Home() {
   const [inventoryList, setInventoryList] = useState<
-    Array<{ category: string; list: Array<InventoryListProps> }>
+    Array<{ id: number; category: string; list: Array<InventoryListProps> }>
   >([]);
 
   useEffect(() => {
@@ -46,20 +46,10 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log(inventoryList, "inventoryList -->");
       const index = inventoryList.findIndex(
         (item) => item.category === inventoryCategoryLabel
       );
       console.log(index, "index -->");
-      // setInventoryList([
-      //   ...inventoryList,
-      //   {
-      //     category: inventoryCategoryLabel,
-      //     list: [...inventoryList[index].list, data],
-      //   },
-      // ]);
-
-      // Update the existing category
       const updatedList = [...inventoryList];
 
       updatedList[index] = {
@@ -75,20 +65,61 @@ export default function Home() {
   const handleDeleteItem = async (id: number) => {
     console.log("numbe is ", id);
     try {
-      await fetch("/api", {
+      const response = await fetch("/api", {
         method: "DELETE",
         body: JSON.stringify({
           id,
         }),
       });
+      const data = await response.json();
+      const tempList = [...inventoryList];
+      const updatedList = tempList.map((item) => ({
+        ...item,
+        list: item.list.filter((wine) => wine.id !== data.id),
+      }));
+      setInventoryList(updatedList);
     } catch (error) {
       console.error("Error deleting an item:", error);
+    }
+  };
+
+  const handleUpdateItem = async (
+    inventoryCategoryLabel: string,
+    { id, label, perBox }: InventoryListProps
+  ) => {
+    try {
+      const response = await fetch("/api", {
+        method: "PUT",
+        body: JSON.stringify({
+          id,
+          label,
+          perBox,
+        }),
+      });
+      const data = await response.json();
+      const index = inventoryList.findIndex(
+        (item) => item.category === inventoryCategoryLabel
+      );
+      const updatedCategory = { ...inventoryList[index] };
+
+      // Replace the updated wine in the list
+      updatedCategory.list = updatedCategory.list.map((wine) =>
+        wine.id === id ? data : wine
+      );
+
+      const updatedList = [...inventoryList];
+      updatedList[index] = updatedCategory;
+
+      setInventoryList(updatedList);
+    } catch (error) {
+      console.error("Error updating an item:", error);
     }
   };
 
   return (
     <div>
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Wine"}
         headerLabel={"Sparkling Wine"}
         handleAddButton={(data) =>
@@ -99,6 +130,7 @@ export default function Home() {
       />
 
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Wine"}
         headerLabel={"Rose"}
         handleAddButton={(data) => addToList("Rose", data.label, data.perBox)}
@@ -107,6 +139,7 @@ export default function Home() {
       />
       <InventoryItem
         label={"Wine"}
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         headerLabel={"Red Wine"}
         handleAddButton={(data) =>
           addToList("Red Wine", data.label, data.perBox)
@@ -115,6 +148,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Wine"}
         headerLabel={"White Wine"}
         handleAddButton={(data) =>
@@ -124,6 +158,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Tequila (Blanco)"}
         headerLabel={"Tequila (Blanco)"}
         handleAddButton={(data) =>
@@ -133,6 +168,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Tequila (Reposado)"}
         headerLabel={"Tequila (Reposado)"}
         handleAddButton={(data) =>
@@ -142,6 +178,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Tequila (Anejo)"}
         headerLabel={"Tequila (Anejo)"}
         handleAddButton={(data) =>
@@ -151,6 +188,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Mezcal"}
         headerLabel={"Mezcal"}
         handleAddButton={(data) => addToList("Mezcal", data.label, data.perBox)}
@@ -158,6 +196,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Spirits (Vodka)"}
         headerLabel={"Spirits (Vodka)"}
         handleAddButton={(data) =>
@@ -167,6 +206,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Spirits (Gin)"}
         headerLabel={"Spirits (Gin)"}
         handleAddButton={(data) =>
@@ -176,6 +216,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Spirits (Scotch)"}
         headerLabel={"Spirits (Scotch)"}
         handleAddButton={(data) =>
@@ -185,6 +226,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Spirits (Whiskey)"}
         headerLabel={"Spirits (Whiskey)"}
         handleAddButton={(data) =>
@@ -194,6 +236,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Spirits (Rum)"}
         headerLabel={"Spirits (Rum)"}
         handleAddButton={(data) =>
@@ -203,6 +246,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Beer"}
         headerLabel={"Beers"}
         handleAddButton={(data) => addToList("Beers", data.label, data.perBox)}
@@ -210,6 +254,7 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Liqueur"}
         headerLabel={"Liqueur"}
         handleAddButton={(data) =>
@@ -219,10 +264,11 @@ export default function Home() {
         handleDelete={handleDeleteItem}
       />
       <InventoryItem
-        label={"Miscellaneous "}
-        headerLabel={"Miscellaneous "}
+        handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
+        label={"Miscellaneous"}
+        headerLabel={"Miscellaneous"}
         handleAddButton={(data) =>
-          addToList("Miscellaneous ", data.label, data.perBox)
+          addToList("Miscellaneous", data.label, data.perBox)
         }
         inventoryList={inventoryList}
         handleDelete={handleDeleteItem}

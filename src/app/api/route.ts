@@ -96,3 +96,37 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+//update item list
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { id, label, perBox }: any = body;
+
+    const perBoxInt = parseInt(perBox);
+    if (isNaN(perBoxInt)) {
+      return NextResponse.json(
+        { error: "perBox must be a number" },
+        { status: 400 }
+      );
+    }
+
+    const inventoryList = await prisma.wine.update({
+      where: { id },
+      data: {
+        label,
+        perBox: perBoxInt,
+      },
+    });
+
+    console.log(inventoryList, "inventoryList -->");
+
+    return NextResponse.json(inventoryList, { status: 200 });
+  } catch (error) {
+    console.error("Error update list:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
