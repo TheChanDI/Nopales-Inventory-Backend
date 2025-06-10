@@ -130,7 +130,7 @@ const InventoryItem = ({
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Current {label} List
           </h3>
-          <ul className="space-y-2">
+          <ul className="space-y-2 max-h-[400px] overflow-auto">
             {inventoryList
               .find((item) => item.category === headerLabel)
               ?.list.map((item) => (

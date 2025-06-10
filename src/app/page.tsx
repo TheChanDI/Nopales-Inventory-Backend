@@ -12,6 +12,7 @@ export default function Home() {
   const [inventoryList, setInventoryList] = useState<
     Array<{ id: number; category: string; list: Array<InventoryListProps> }>
   >([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getInventoryList();
@@ -19,6 +20,7 @@ export default function Home() {
 
   const getInventoryList = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api", {
         method: "GET",
       });
@@ -27,6 +29,8 @@ export default function Home() {
       setInventoryList(data);
     } catch (error) {
       console.error("Error fetching list:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,6 +39,7 @@ export default function Home() {
     inventoryItemLabel: string,
     perBox: number
   ) => {
+    setLoading(true);
     try {
       const response = await fetch("/api", {
         method: "POST",
@@ -59,11 +64,13 @@ export default function Home() {
       setInventoryList(updatedList);
     } catch (error) {
       console.error("Error adding to list:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteItem = async (id: number) => {
-    console.log("numbe is ", id);
+    setLoading(true);
     try {
       const response = await fetch("/api", {
         method: "DELETE",
@@ -80,6 +87,8 @@ export default function Home() {
       setInventoryList(updatedList);
     } catch (error) {
       console.error("Error deleting an item:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,6 +97,7 @@ export default function Home() {
     { id, label, perBox }: InventoryListProps
   ) => {
     try {
+      setLoading(true);
       const response = await fetch("/api", {
         method: "PUT",
         body: JSON.stringify({
@@ -113,11 +123,21 @@ export default function Home() {
       setInventoryList(updatedList);
     } catch (error) {
       console.error("Error updating an item:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div>
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="w-10 h-10 border-4 border-dashed border-white rounded-full animate-spin"></div>
+            <span className="mt-4 text-white text-sm">Loading...</span>
+          </div>
+        </div>
+      )}
       <InventoryItem
         handleUpdateItem={(category, item) => handleUpdateItem(category, item)}
         label={"Wine"}
