@@ -1,15 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
+import InventoryItem from "./components/InventoryItem";
 
-interface WineProps {
+export interface InventoryListProps {
+  id: number;
   label: string;
   perBox: number;
 }
 
 export default function Home() {
-  const [wineName, setWineName] = useState("");
-  const [perBox, setPerBox] = useState("");
-  const [wineList, setWineList] = useState<Array<WineProps>>([]);
+  const [inventoryList, setInventoryList] = useState<
+    Array<{ category: string; list: Array<InventoryListProps> }>
+  >([]);
 
   useEffect(() => {
     getInventoryList();
@@ -22,106 +24,209 @@ export default function Home() {
       });
       const data = await response.json();
       console.log(data, "data -->");
-      setWineList(data);
+      setInventoryList(data);
     } catch (error) {
       console.error("Error fetching list:", error);
     }
   };
 
-  const handleAddWine = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!wineName.trim() || !perBox.trim()) return;
-
-    const newEntry = {
-      label: wineName.trim(),
-      perBox: parseInt(perBox, 10),
-    };
-
-    addToList();
-    setWineName("");
-    setPerBox("");
-  };
-
-  const addToList = async () => {
+  const addToList = async (
+    inventoryCategoryLabel: string,
+    inventoryItemLabel: string,
+    perBox: number
+  ) => {
     try {
       const response = await fetch("/api", {
         method: "POST",
         body: JSON.stringify({
-          category: "Sparkling Wine",
-          label: wineName.trim(),
-          perBox: parseInt(perBox, 10),
+          category: inventoryCategoryLabel,
+          label: inventoryItemLabel,
+          perBox: perBox,
         }),
       });
 
       const data = await response.json();
-      setWineList([...wineList, data]);
-      console.log(data, "added data -->");
+      console.log(inventoryList, "inventoryList -->");
+      const index = inventoryList.findIndex(
+        (item) => item.category === inventoryCategoryLabel
+      );
+      console.log(index, "index -->");
+      // setInventoryList([
+      //   ...inventoryList,
+      //   {
+      //     category: inventoryCategoryLabel,
+      //     list: [...inventoryList[index].list, data],
+      //   },
+      // ]);
+
+      // Update the existing category
+      const updatedList = [...inventoryList];
+
+      updatedList[index] = {
+        ...updatedList[index],
+        list: [...updatedList[index].list, data],
+      };
+      setInventoryList(updatedList);
     } catch (error) {
       console.error("Error adding to list:", error);
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        Sparkling Wine Inventory
-      </h2>
-      <form onSubmit={handleAddWine} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Wine Name
-          </label>
-          <input
-            type="text"
-            value={wineName}
-            onChange={(e) => setWineName(e.target.value)}
-            placeholder="e.g., Amanti Prossecco NV Glera"
-            className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Bottles per Box
-          </label>
-          <input
-            type="number"
-            value={perBox}
-            onChange={(e) => setPerBox(e.target.value)}
-            placeholder="e.g., 12"
-            min="1"
-            className="w-full px-4 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-200"
-        >
-          Add Wine
-        </button>
-      </form>
+  const handleDeleteItem = async (id: number) => {
+    console.log("numbe is ", id);
+    try {
+      await fetch("/api", {
+        method: "DELETE",
+        body: JSON.stringify({
+          id,
+        }),
+      });
+    } catch (error) {
+      console.error("Error deleting an item:", error);
+    }
+  };
 
-      {wineList.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Current Wine List
-          </h3>
-          <ul className="space-y-2">
-            {wineList.map((wine, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-center bg-gray-50 p-4 rounded-md border border-gray-200"
-              >
-                <span className="text-gray-700">{wine.label}</span>
-                <span className="text-sm text-gray-500">
-                  {wine.perBox} bottles/box
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+  return (
+    <div>
+      <InventoryItem
+        label={"Wine"}
+        headerLabel={"Sparkling Wine"}
+        handleAddButton={(data) =>
+          addToList("Sparkling Wine", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+
+      <InventoryItem
+        label={"Wine"}
+        headerLabel={"Rose"}
+        handleAddButton={(data) => addToList("Rose", data.label, data.perBox)}
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Wine"}
+        headerLabel={"Red Wine"}
+        handleAddButton={(data) =>
+          addToList("Red Wine", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Wine"}
+        headerLabel={"White Wine"}
+        handleAddButton={(data) =>
+          addToList("White Wine", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Tequila (Blanco)"}
+        headerLabel={"Tequila (Blanco)"}
+        handleAddButton={(data) =>
+          addToList("Tequila (Blanco)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Tequila (Reposado)"}
+        headerLabel={"Tequila (Reposado)"}
+        handleAddButton={(data) =>
+          addToList("Tequila (Reposado)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Tequila (Anejo)"}
+        headerLabel={"Tequila (Anejo)"}
+        handleAddButton={(data) =>
+          addToList("Tequila (Anejo)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Mezcal"}
+        headerLabel={"Mezcal"}
+        handleAddButton={(data) => addToList("Mezcal", data.label, data.perBox)}
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Spirits (Vodka)"}
+        headerLabel={"Spirits (Vodka)"}
+        handleAddButton={(data) =>
+          addToList("Spirits (Vodka)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Spirits (Gin)"}
+        headerLabel={"Spirits (Gin)"}
+        handleAddButton={(data) =>
+          addToList("Spirits (Gin)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Spirits (Scotch)"}
+        headerLabel={"Spirits (Scotch)"}
+        handleAddButton={(data) =>
+          addToList("Spirits (Scotch)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Spirits (Whiskey)"}
+        headerLabel={"Spirits (Whiskey)"}
+        handleAddButton={(data) =>
+          addToList("Spirits (Whiskey)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Spirits (Rum)"}
+        headerLabel={"Spirits (Rum)"}
+        handleAddButton={(data) =>
+          addToList("Spirits (Rum)", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Beer"}
+        headerLabel={"Beers"}
+        handleAddButton={(data) => addToList("Beers", data.label, data.perBox)}
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Liqueur"}
+        headerLabel={"Liqueur"}
+        handleAddButton={(data) =>
+          addToList("Liqueur", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
+      <InventoryItem
+        label={"Miscellaneous "}
+        headerLabel={"Miscellaneous "}
+        handleAddButton={(data) =>
+          addToList("Miscellaneous ", data.label, data.perBox)
+        }
+        inventoryList={inventoryList}
+        handleDelete={handleDeleteItem}
+      />
     </div>
   );
 }

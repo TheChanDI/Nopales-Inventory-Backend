@@ -26,8 +26,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { category, label, perBox }: any = body;
 
-    console.log(body, "body -->");
-
     if (!category || !label || perBox === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -66,6 +64,32 @@ export async function POST(request: Request) {
     return NextResponse.json(wine, { status: 201 });
   } catch (error) {
     console.error("Error add list:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+//delete new list
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { id }: any = body;
+    console.log(id, "id backend -->");
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const inventoryList = await prisma.wine.delete({
+      where: { id },
+    });
+    return NextResponse.json(inventoryList, { status: 200 });
+  } catch (error) {
+    console.error("Error delete list:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
