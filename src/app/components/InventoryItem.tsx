@@ -127,9 +127,18 @@ const InventoryItem = ({
 
       {inventoryList.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Current {label} List
-          </h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Current {label} List
+            </h3>
+            <h5 className="text-sm font-bold mb-2 text-gray-400">
+              {
+                inventoryList.find((item) => item.category === headerLabel)
+                  ?.list.length
+              }{" "}
+              items
+            </h5>
+          </div>
           <ul className="space-y-2 max-h-[400px] overflow-auto">
             {inventoryList
               .find((item) => item.category === headerLabel)
